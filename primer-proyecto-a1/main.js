@@ -49,15 +49,21 @@ var app = new Vue({
                     this.obtenerClientes();
                 },
                 (tx, error)=>{
-                    this.cliente.msg = `Error al guardar el cliente ${error.message}`;
+                    switch(error.code){
+                        case 6:
+                            this.cliente.msg = 'El codigo o DUI ya existe, por favor digite otro';
+                            break;
+                        default:
+                                this.cliente.msg = `Error al guardar el cliente ${error.message}`;
+                    }
                 });
             });
         },
-        modificarCliente(cliente){
-            this.cliente = cliente;
+        modificarCliente(data){
+            this.cliente = data;
             this.cliente.accion = 'modificar';
         },
-        eliminarCliente(cliente){
+        eliminarCliente(data){
             if( confirm(`¿Esta seguro de eliminar el cliente ${cliente.nombre}?`) ){
                 this.cliente.idCliente = cliente.idCliente;
                 this.cliente.accion = 'eliminar';
@@ -83,12 +89,13 @@ var app = new Vue({
             this.cliente.direccion = '';
             this.cliente.telefono = '';
             this.cliente.dui = '';
+            this.cliente.smg = '';
         }
     },
     created(){
         db_sistema.transaction(tx=>{
             tx.executeSql('CREATE TABLE IF NOT EXISTS clientes(idCliente INTEGER PRIMARY KEY AUTOINCREMENT, '+
-                'codigo char(10), nombre char(75), direccion TEXT, telefono char(10), dui char(10))');
+                'codigo char(10) unique, nombre char(75), direccion TEXT, telefono char(10), dui char(10) unique)');
         }, err=>{
             console.log('Error al crear la tabla de clientes', err);
         });
