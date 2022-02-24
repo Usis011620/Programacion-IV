@@ -71,6 +71,7 @@ Vue.component('autor',{
         nuevoAutor(){
             this.autor.accion = 'nuevo';
             this.autor.msg = '';
+            this.autor.idAutor = '';
             this.autor.codigo = '';
             this.autor.nombre = '';
             this.autor.pais = '';

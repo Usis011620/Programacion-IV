@@ -22,7 +22,7 @@ Vue.component('libro',{
             this.obtenerLibros(this.buscar);
         },
         eliminarLibro(libro){
-            if( confirm(`Esta seguro de eliminar el libro ${libro.nombre}?`) ){
+            if( confirm(`Esta seguro de eliminar el libro ${libro.titulo}?`) ){
                 this.libro.idLibro = libro.idLibro;
                 this.libro.accion = 'eliminar';
                 this.guardarLibro();
@@ -30,6 +30,7 @@ Vue.component('libro',{
         },
         modificarLibro(libro){
             this.libro = JSON.parse(JSON.stringify(libro));
+            console.log(this.libro);
             this.libro.accion = 'modificar';
         },
         guardarLibro(){
@@ -51,6 +52,7 @@ Vue.component('libro',{
                     (tx, res)=>{
                         this.nuevoLibro();
                         this.obtenerLibros();
+                        this.obtenerAutores();
                         this.libro.mostrar_msg = true;
                         this.libro.msg = 'Libro procesado con exito';
                     },
@@ -62,8 +64,8 @@ Vue.component('libro',{
         },
         obtenerLibros(valor=''){
             let respuesta = db_sistema.transaction(tx=>{
-                tx.executeSql(`SELECT * FROM libros WHERE titulo like "%${valor}%" OR codigo like "%${valor}%" ORDER BY titulo`, [], (index, datos)=>{
-                    this.libros = [];
+                tx.executeSql(`SELECT l.idLibro, l.idAutor, l.codigo, l.titulo, l.editorial, l.edicion, a.nombre as autor FROM libros l INNER JOIN autores a ON l.idAutor=a.idAutor WHERE l.titulo like "%${valor}%" OR l.codigo like "%${valor}%" OR a.nombre like "%${valor}%" ORDER BY l.titulo`, [], (index, datos)=>{
+                        this.libros = [];
                             for(let i=0; i<datos.rows.length; i++){
                                 this.libros.push(datos.rows[i]);
                             }
@@ -89,6 +91,7 @@ Vue.component('libro',{
             this.libro.titulo = '';
             this.libro.editorial = '';
             this.libro.edicion = '';
+            this.obtenerAutores();
         }
     },
     created(){
@@ -124,21 +127,21 @@ Vue.component('libro',{
                             </div>
                         </div>
                         <div class="row p-1">
-                            <div class="col col-md-2">Nombre:</div>
+                            <div class="col col-md-2">Titulo:</div>
                             <div class="col col-md-3">
-                                <input title="Ingrese el nombre" v-model="libro.nombre" pattern="[A-Za-zñÑáéíóúü ]{3,75}" required type="text" class="form-control">
+                                <input title="Ingrese el titulo" v-model="libro.titulo" pattern="[A-Za-zñÑáéíóúü ]{3,75}" required type="text" class="form-control">
                             </div>
                         </div>
                         <div class="row p-1">
-                            <div class="col col-md-2">Pais:</div>
+                            <div class="col col-md-2">Editorial:</div>
                             <div class="col col-md-3">
-                                <input title="Ingrese el pais" v-model="libro.pais" pattern="[A-Za-zñÑáéíóúü ]{3,100}" required type="text" class="form-control">
+                                <input title="Ingrese la editorial" v-model="libro.editorial" pattern="[A-Za-zñÑáéíóúü ]{3,75}" required type="text" class="form-control">
                             </div>
                         </div>
                         <div class="row p-1">
-                            <div class="col col-md-2">Telefono:</div>
+                            <div class="col col-md-2">Edicion:</div>
                             <div class="col col-md-2">
-                                <input title="Ingrese el tel" v-model="libro.telefono" pattern="[0-9]{4}-[0-9]{4}" required type="text" class="form-control">
+                                <input title="Ingrese la edicion" v-model="libro.edicion" pattern="[0-9]{1,2}" required type="text" class="form-control">
                             </div>
                         </div>
                         <div class="row p-1">
